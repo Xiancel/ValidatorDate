@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"unicode"
 )
 
 // допустимые символы для Email
@@ -23,11 +24,11 @@ func optionMenu() {
 }
 
 func validEmail(email string) error {
-	//створення помилки
-	err := errors.New("email не валідний")
+	// створення помилки
+	err := errors.New("Email не валідний!")
 
 	//перевірка введеного email на наявність символа "@" чи пробілів
-	if strings.Count(email, "@") != 1 || strings.Count(email, " ") >= 1 {
+	if strings.Count(email, "@") != 1 || strings.Count(email, " ") != 0 {
 		return err
 	}
 	//розділення ємейлу на дві частини
@@ -62,11 +63,58 @@ func validEmail(email string) error {
 
 	return nil
 }
+
+func validPass(password string) error {
+	var reasons []string
+
+	var digits, upper, lower, special bool
+	if len(password) < 8 {
+		reasons = append(reasons, "- Менш ніж 8 символів")
+	}
+	if strings.Count(password, " ") != 0 {
+		reasons = append(reasons, "- Присутній Пробіл")
+	}
+
+	for _, r := range password {
+		if unicode.IsDigit(r) {
+			digits = true
+		}
+		if unicode.IsUpper(r) {
+			upper = true
+		}
+		if unicode.IsLower(r) {
+			lower = true
+		}
+	}
+
+	if strings.ContainsAny(password, "!@#$%^&*()-_=+[]{}|;:,.<>/?'\"") {
+		special = true
+	}
+
+	if !digits {
+		reasons = append(reasons, "- Відсутні Цифри")
+	}
+	if !upper {
+		reasons = append(reasons, "- Відсутні великі літери")
+	}
+	if !lower {
+		reasons = append(reasons, "- Відсутні маленьки літери")
+	}
+	if !special {
+		reasons = append(reasons, "- Відсутні спеціальні символи")
+	}
+
+	if len(reasons) > 0 {
+		return errors.New("Пароль не надійний! Причини: \n" + strings.Join(reasons, "\n"))
+	}
+
+	return nil
+}
 func main() {
 	var choise int
-	var email string
+	var email, password string
 	for {
-		fmt.Println("Виберіть опцію:")
+		fmt.Println("\nВиберіть опцію:")
 		optionMenu()
 
 		fmt.Print("\nВаш вибір: ")
@@ -76,16 +124,23 @@ func main() {
 		case 0:
 			return
 		case 1:
-			fmt.Println("Введіть email-адресу:")
+			fmt.Print("Введіть email-адресу: ")
 			fmt.Scanln(&email)
 			err := validEmail(email)
 			if err != nil {
 				fmt.Println("Результат: ", err)
 			} else {
-				fmt.Println("Результат: email валідний")
+				fmt.Println("Результат: Email валідний!")
 			}
 		case 2:
-			fmt.Println("Ваш вибір: ", choise)
+			fmt.Print("Введіть пароль: ")
+			fmt.Scanln(&password)
+			err := validPass(password)
+			if err != nil {
+				fmt.Println("Результат: ", err)
+			} else {
+				fmt.Println("Результат: Пароль надійний!")
+			}
 		case 3:
 			fmt.Println("Ваш вибір: ", choise)
 		case 4:
